@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estonian Food Waste Actor Network</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2em;
+        }
+        
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        select, button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 2px solid #cbd5e0;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        select:hover, button:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        #network {
+            width: 100%;
+            height: 700px;
+            background: #ffffff;
+        }
+        
+        .legend {
+            padding: 20px 30px;
+            background: #f7fafc;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        .legend h3 {
+            margin: 0 0 15px 0;
+            color: #2d3748;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .legend-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .legend-section h4 {
+            margin: 0 0 10px 0;
+            color: #4a5568;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .legend-line {
+            width: 40px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        .node {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            stroke-width: 3px;
+        }
+        
+        .node-label {
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
+        }
+        
+        .link {
+            stroke-opacity: 0.6;
+            transition: all 0.3s;
+        }
+        
+        .link:hover {
+            stroke-opacity: 1;
+            stroke-width: 4px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 8px;
+            pointer-events: none;
+            font-size: 13px;
+            max-width: 300px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+        }
+        
+        .tooltip strong {
+            color: #fbbf24;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 Estonian Food Waste Actor Network</h1>
+            <p>167,000 tonnes/year • €164 million • Interactive Network Visualization</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Focus on:</label>
+                <select id="filterSelect">
+                    <option value="all">All Actors</option>
+                    <option value="supply">Supply Chain</option>
+                    <option value="waste">Waste Management</option>
+                    <option value="support">Support Systems</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Highlight Sector:</label>
+                <select id="sectorSelect">
+                    <option value="none">None</option>
+                    <option value="households">Households (48%)</option>
+                    <option value="industry">Food Industry (19%)</option>
+                    <option value="production">Primary Production (14%)</option>
+                    <option value="retail">Retail (12%)</option>
+                    <option value="catering">Catering (7%)</option>
+                    <option value="logistics">Logistics & Delivery</option>
+                </select>
+            </div>
+            <button onclick="resetView()">Reset View</button>
+        </div>
+        
+        <svg id="network"></svg>
+        
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-grid">
+                <div class="legend-section">
+                    <h4>Actors by Sector</h4>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>Households (48%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span>Food Industry (19%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Primary Production (14%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>Retail (12%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #8b5cf6;"></div>
+                        <span>Catering (7%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ec4899;"></div>
+                        <span>Logistics & Delivery</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #6b7280;"></div>
+                        <span>Support Systems</span>
+                    </div>
+                </div>
+                
+                <div class="legend-section">
+                    <h4>Connection Types</h4>
+                    <div class="legend-item">
+                        <div class="legend-line" style="background: #3b82f6;"></div>
+                        <span>Supply Chain Flow</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line" style="background: #ef4444;"></div>
+                        <span>Waste Generation</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line" style="background: #10b981;"></div>
+                        <span>Waste Prevention</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line" style="background: #9ca3af;"></div>
+                        <span>Support/Regulation</span>
+                    </div>
+                </div>
+                
+                <div class="legend-section">
+                    <h4>Node Size</h4>
+                    <p style="margin: 0; color: #6b7280; font-size: 0.85em;">
+                        Larger circles = Higher waste volume or greater influence in the network
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        const nodes = [
+            // Main Sectors
+            { id: 'households', label: 'Households', sector: 'households', size: 48, description: '81,000 tonnes/year (48%), €98M waste, 42% avoidable' },
+            { id: 'industry', label: 'Food Industry', sector: 'industry', size: 19, description: '32,000 tonnes/year (19%), 10% avoidable' },
+            { id: 'production', label: 'Primary Production', sector: 'production', size: 14, description: '24,000 tonnes/year (14%), 82% avoidable' },
+            { id: 'retail', label: 'Retail', sector: 'retail', size: 12, description: '20,000 tonnes/year (12%)' },
+            { id: 'catering', label: 'Catering', sector: 'catering', size: 7, description: '11,000 tonnes/year (7%)' },
+            { id: 'logistics', label: 'Logistics & Delivery', sector: 'logistics', size: 8, description: 'Emerging sector: wholesalers, Bolt Food, Wolt' },
+            
+            // Retail Actors
+            { id: 'rimi', label: 'Rimi', sector: 'retail', size: 5, description: 'Major retailer using AI markdown pricing' },
+            { id: 'selver', label: 'Selver', sector: 'retail', size: 5, description: 'Major retailer with food bank partnerships' },
+            { id: 'coop', label: 'Coop', sector: 'retail', size: 4, description: 'Cooperative retail chain' },
+            
+            // Industry Actors
+            { id: 'dairy', label: 'Dairy Processors', sector: 'industry', size: 6, description: 'Dairy production and processing' },
+            { id: 'bakery', label: 'Bakeries', sector: 'industry', size: 4, description: 'Bread and bakery products' },
+            { id: 'meat', label: 'Meat Processors', sector: 'industry', size: 5, description: 'Meat processing industry' },
+            
+            // Production Actors
+            { id: 'farmers', label: 'Farmers', sector: 'production', size: 7, description: 'Agricultural producers, 80% avoidable loss' },
+            { id: 'aquaculture', label: 'Aquaculture', sector: 'production', size: 3, description: 'Fish farming' },
+            
+            // Catering Actors
+            { id: 'restaurants', label: 'Restaurants', sector: 'catering', size: 5, description: '75% of catering waste' },
+            { id: 'schools', label: 'Schools & Kindergartens', sector: 'catering', size: 4, description: '1,900 tonnes/year, €3.8M losses' },
+            { id: 'hospitals', label: 'Hospitals', sector: 'catering', size: 2, description: 'Small share (3%) of catering waste' },
+            
+            // Logistics
+            { id: 'wholesalers', label: 'Wholesalers', sector: 'logistics', size: 5, description: 'Distribution centers and storage' },
+            { id: 'delivery', label: 'Bolt/Wolt', sector: 'logistics', size: 4, description: 'Last-mile delivery services' },
+            
+            // Support Systems
+            { id: 'toidupank', label: 'Toidupank', sector: 'support', size: 6, description: 'Food Bank - receives donations from retail' },
+            { id: 'government', label: 'Government', sector: 'support', size: 7, description: 'Ministry of Rural Affairs, regulations' },
+            { id: 'university', label: 'Estonian University', sector: 'support', size: 4, description: 'Research and education' },
+            { id: 'waste', label: 'Waste Contractors', sector: 'support', size: 5, description: 'Waste management services' },
+            { id: 'media', label: 'Media', sector: 'support', size: 4, description: 'Consumer awareness campaigns' },
+        ];
+
+        const links = [
+            // Supply Chain (blue)
+            { source: 'production', target: 'industry', type: 'supply', label: 'Raw materials' },
+            { source: 'farmers', target: 'industry', type: 'supply', label: 'Agricultural products' },
+            { source: 'farmers', target: 'retail', type: 'supply', label: 'Direct sales' },
+            { source: 'dairy', target: 'retail', type: 'supply', label: 'Dairy products' },
+            { source: 'bakery', target: 'retail', type: 'supply', label: 'Baked goods' },
+            { source: 'meat', target: 'retail', type: 'supply', label: 'Meat products' },
+            { source: 'industry', target: 'retail', type: 'supply', label: 'Processed foods' },
+            { source: 'industry', target: 'catering', type: 'supply', label: 'Ingredients' },
+            { source: 'wholesalers', target: 'retail', type: 'supply', label: 'Distribution' },
+            { source: 'wholesalers', target: 'catering', type: 'supply', label: 'Bulk supply' },
+            { source: 'retail', target: 'households', type: 'supply', label: 'Consumer purchases' },
+            { source: 'rimi', target: 'households', type: 'supply', label: 'Sales' },
+            { source: 'selver', target: 'households', type: 'supply', label: 'Sales' },
+            { source: 'coop', target: 'households', type: 'supply', label: 'Sales' },
+            { source: 'logistics', target: 'retail', type: 'supply', label: 'Transport' },
+            { source: 'logistics', target: 'catering', type: 'supply', label: 'Transport' },
+            { source: 'delivery', target: 'households', type: 'supply', label: 'Food delivery' },
+            { source: 'restaurants', target: 'households', type: 'supply', label: 'Dining' },
+            
+            // Waste Generation (red)
+            { source: 'households', target: 'waste', type: 'waste', label: '42% avoidable' },
+            { source: 'production', target: 'waste', type: 'waste', label: '82% avoidable' },
+            { source: 'farmers', target: 'waste', type: 'waste', label: 'Field losses' },
+            { source: 'industry', target: 'waste', type: 'waste', label: 'Production errors' },
+            { source: 'retail', target: 'waste', type: 'waste', label: 'Unsold products' },
+            { source: 'catering', target: 'waste', type: 'waste', label: 'Plate waste' },
+            { source: 'restaurants', target: 'waste', type: 'waste', label: 'Overproduction' },
+            { source: 'schools', target: 'waste', type: 'waste', label: 'Uneaten meals' },
+            
+            // Waste Prevention (green)
+            { source: 'retail', target: 'toidupank', type: 'prevention', label: 'Donations' },
+            { source: 'rimi', target: 'toidupank', type: 'prevention', label: 'AI markdown' },
+            { source: 'selver', target: 'toidupank', type: 'prevention', label: 'Donations' },
+            { source: 'coop', target: 'toidupank', type: 'prevention', label: 'Partnerships' },
+            { source: 'toidupank', target: 'households', type: 'prevention', label: 'Food rescue' },
+            
+            // Support & Regulation (gray)
+            { source: 'government', target: 'households', type: 'support', label: 'Awareness campaigns' },
+            { source: 'government', target: 'retail', type: 'support', label: 'Regulations' },
+            { source: 'government', target: 'production', type: 'support', label: 'Agricultural policy' },
+            { source: 'government', target: 'catering', type: 'support', label: 'Standards' },
+            { source: 'media', target: 'households', type: 'support', label: 'Behavior influence' },
+            { source: 'university', target: 'production', type: 'support', label: 'Research & training' },
+            { source: 'university', target: 'farmers', type: 'support', label: 'Best practices' },
+        ];
+
+        const colors = {
+            households: '#ef4444',
+            industry: '#f59e0b',
+            production: '#10b981',
+            retail: '#3b82f6',
+            catering: '#8b5cf6',
+            logistics: '#ec4899',
+            support: '#6b7280'
+        };
+
+        const linkColors = {
+            supply: '#3b82f6',
+            waste: '#ef4444',
+            prevention: '#10b981',
+            support: '#9ca3af'
+        };
+
+        const width = 1400;
+        const height = 700;
+
+        const svg = d3.select('#network')
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g');
+
+        // Zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 3])
+            .on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            });
+
+        svg.call(zoom);
+
+        const simulation = d3.forceSimulation(nodes)
+            .force('link', d3.forceLink(links).id(d => d.id).distance(150))
+            .force('charge', d3.forceManyBody().strength(-800))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(d => d.size * 2 + 10));
+
+        const link = g.append('g')
+            .selectAll('line')
+            .data(links)
+            .enter().append('line')
+            .attr('class', 'link')
+            .attr('stroke', d => linkColors[d.type])
+            .attr('stroke-width', 2);
+
+        const node = g.append('g')
+            .selectAll('circle')
+            .data(nodes)
+            .enter().append('circle')
+            .attr('class', 'node')
+            .attr('r', d => d.size * 1.5)
+            .attr('fill', d => colors[d.sector])
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 2)
+            .call(d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended));
+
+        const label = g.append('g')
+            .selectAll('text')
+            .data(nodes)
+            .enter().append('text')
+            .attr('class', 'node-label')
+            .attr('text-anchor', 'middle')
+            .attr('dy', d => d.size * 1.5 + 15)
+            .text(d => d.label);
+
+        const tooltip = d3.select('#tooltip');
+
+        node.on('mouseover', function(event, d) {
+            tooltip.html(`<strong>${d.label}</strong><br>${d.description}`)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px')
+                .classed('show', true);
+        })
+        .on('mouseout', function() {
+            tooltip.classed('show', false);
+        });
+
+        link.on('mouseover', function(event, d) {
+            tooltip.html(`<strong>${d.label}</strong><br>From: ${d.source.label}<br>To: ${d.target.label}`)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px')
+                .classed('show', true);
+        })
+        .on('mouseout', function() {
+            tooltip.classed('show', false);
+        });
+
+        simulation.on('tick', () => {
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            node
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y);
+
+            label
+                .attr('x', d => d.x)
+                .attr('y', d => d.y);
+        });
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        // Filter functionality
+        d3.select('#filterSelect').on('change', function() {
+            const filter = this.value;
+            
+            link.style('opacity', d => {
+                if (filter === 'all') return 0.6;
+                if (filter === 'supply' && d.type === 'supply') return 0.8;
+                if (filter === 'waste' && d.type === 'waste') return 0.8;
+                if (filter === 'support' && (d.type === 'support' || d.type === 'prevention')) return 0.8;
+                return 0.1;
+            });
+        });
+
+        d3.select('#sectorSelect').on('change', function() {
+            const sector = this.value;
+            
+            node.style('opacity', d => {
+                if (sector === 'none') return 1;
+                return d.sector === sector ? 1 : 0.2;
+            });
+            
+            label.style('opacity', d => {
+                if (sector === 'none') return 1;
+                return d.sector === sector ? 1 : 0.2;
+            });
+        });
+
+        function resetView() {
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity
+            );
+            d3.select('#filterSelect').property('value', 'all');
+            d3.select('#sectorSelect').property('value', 'none');
+            link.style('opacity', 0.6);
+            node.style('opacity', 1);
+            label.style('opacity', 1);
+        }
+    </script>
+</body>
+</html>
