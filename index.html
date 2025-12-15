@@ -310,7 +310,7 @@
             { id: 'production', label: 'Primary Production', sector: 'production', size: 14, description: '24,000 tonnes/year (14%), 82% avoidable' },
             { id: 'retail', label: 'Retail', sector: 'retail', size: 12, description: '20,000 tonnes/year (12%) - includes Rimi (AI markdown pricing), Selver, Coop, Maxima' },
             { id: 'catering', label: 'Catering', sector: 'catering', size: 7, description: '11,000 tonnes/year (7%) - includes schools & kindergartens (1,900t/year, €3.8M losses)' },
-            { id: 'logistics', label: 'Logistics & Delivery', sector: 'logistics', size: 8, description: 'Emerging sector: wholesalers, Bolt Food, Wolt (last-mile delivery services)' },
+            { id: 'logistics', label: 'Logistics', sector: 'logistics', size: 8, description: 'Emerging sector: food delivery, Bolt Food, Wolt (last-mile delivery services)' },
             
             // Production Actors
             { id: 'farmers', label: 'Farmers', sector: 'production', size: 7, description: 'Agricultural producers, 80% avoidable loss' },
@@ -319,9 +319,6 @@
             // Catering Actors
             { id: 'restaurants', label: 'Restaurants', sector: 'catering', size: 5, description: '75% of catering waste' },
             { id: 'hospitals', label: 'Hospitals', sector: 'catering', size: 2, description: 'Small share (3%) of catering waste' },
-            
-            // Logistics
-            { id: 'wholesalers', label: 'Wholesalers', sector: 'logistics', size: 5, description: 'Distribution centers and storage' },
             
             // Support Systems
             { id: 'foodrescue', label: 'Food Rescue Organizations', sector: 'support', size: 6, description: 'Food banks and rescue platforms - includes Toidupank, Sumena, Yummy' },
@@ -338,8 +335,6 @@
             { source: 'farmers', target: 'retail', type: 'supply', label: 'Direct sales' },
             { source: 'industry', target: 'retail', type: 'supply', label: 'Processed foods' },
             { source: 'industry', target: 'catering', type: 'supply', label: 'Ingredients' },
-            { source: 'wholesalers', target: 'retail', type: 'supply', label: 'Distribution' },
-            { source: 'wholesalers', target: 'catering', type: 'supply', label: 'Bulk supply' },
             { source: 'retail', target: 'households', type: 'supply', label: 'Consumer purchases' },
             { source: 'logistics', target: 'retail', type: 'supply', label: 'Transport' },
             { source: 'logistics', target: 'catering', type: 'supply', label: 'Transport' },
@@ -368,7 +363,8 @@
             { source: 'government', target: 'catering', type: 'support', label: 'Standards' },
             { source: 'media', target: 'households', type: 'support', label: 'Behavior influence' },
             { source: 'university', target: 'production', type: 'support', label: 'Research & training' },
-            { source: 'university', target: 'farmers', type: 'support', label: 'Best practices' },
+            { source: 'university', target: 'government', type: 'support', label: 'Best practices' },
+            { source: 'university', target: 'households', type: 'support', label: 'Suggest awareness strategies' },
         ];
 
         const colors = {
