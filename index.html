@@ -308,14 +308,12 @@
             { id: 'households', label: 'Households', sector: 'households', size: 48, description: '81,000 tonnes/year (48%), €98M waste, 42% avoidable' },
             { id: 'industry', label: 'Food Industry', sector: 'industry', size: 19, description: '32,000 tonnes/year (19%), 10% avoidable' },
             { id: 'production', label: 'Primary Production', sector: 'production', size: 14, description: '24,000 tonnes/year (14%), 82% avoidable' },
-            { id: 'retail', label: 'Retail', sector: 'retail', size: 12, description: '20,000 tonnes/year (12%)' },
-            { id: 'catering', label: 'Catering', sector: 'catering', size: 7, description: '11,000 tonnes/year (7%)' },
-            { id: 'logistics', label: 'Logistics & Delivery', sector: 'logistics', size: 8, description: 'Emerging sector: wholesalers, Bolt Food, Wolt' },
+            { id: 'retail', label: 'Retail', sector: 'retail', size: 12, description: '20,000 tonnes/year (12%) - includes Rimi (AI markdown pricing), Selver, Coop' },
+            { id: 'catering', label: 'Catering', sector: 'catering', size: 7, description: '11,000 tonnes/year (7%) - includes schools & kindergartens (1,900t/year, €3.8M losses)' },
+            { id: 'logistics', label: 'Logistics & Delivery', sector: 'logistics', size: 8, description: 'Emerging sector: wholesalers, Bolt Food, Wolt (last-mile delivery services)' },
             
             // Retail Actors
-            { id: 'rimi', label: 'Rimi', sector: 'retail', size: 5, description: 'Major retailer using AI markdown pricing' },
             { id: 'selver', label: 'Selver', sector: 'retail', size: 5, description: 'Major retailer with food bank partnerships' },
-            { id: 'coop', label: 'Coop', sector: 'retail', size: 4, description: 'Cooperative retail chain' },
             
             // Industry Actors
             { id: 'dairy', label: 'Dairy Processors', sector: 'industry', size: 6, description: 'Dairy production and processing' },
@@ -328,12 +326,10 @@
             
             // Catering Actors
             { id: 'restaurants', label: 'Restaurants', sector: 'catering', size: 5, description: '75% of catering waste' },
-            { id: 'schools', label: 'Schools & Kindergartens', sector: 'catering', size: 4, description: '1,900 tonnes/year, €3.8M losses' },
             { id: 'hospitals', label: 'Hospitals', sector: 'catering', size: 2, description: 'Small share (3%) of catering waste' },
             
             // Logistics
             { id: 'wholesalers', label: 'Wholesalers', sector: 'logistics', size: 5, description: 'Distribution centers and storage' },
-            { id: 'delivery', label: 'Bolt/Wolt', sector: 'logistics', size: 4, description: 'Last-mile delivery services' },
             
             // Support Systems
             { id: 'toidupank', label: 'Toidupank', sector: 'support', size: 6, description: 'Food Bank - receives donations from retail' },
@@ -356,12 +352,9 @@
             { source: 'wholesalers', target: 'retail', type: 'supply', label: 'Distribution' },
             { source: 'wholesalers', target: 'catering', type: 'supply', label: 'Bulk supply' },
             { source: 'retail', target: 'households', type: 'supply', label: 'Consumer purchases' },
-            { source: 'rimi', target: 'households', type: 'supply', label: 'Sales' },
-            { source: 'selver', target: 'households', type: 'supply', label: 'Sales' },
-            { source: 'coop', target: 'households', type: 'supply', label: 'Sales' },
             { source: 'logistics', target: 'retail', type: 'supply', label: 'Transport' },
             { source: 'logistics', target: 'catering', type: 'supply', label: 'Transport' },
-            { source: 'delivery', target: 'households', type: 'supply', label: 'Food delivery' },
+            { source: 'logistics', target: 'households', type: 'supply', label: 'Food delivery' },
             { source: 'restaurants', target: 'households', type: 'supply', label: 'Dining' },
             
             // Waste Generation (red)
@@ -372,13 +365,10 @@
             { source: 'retail', target: 'waste', type: 'waste', label: 'Unsold products' },
             { source: 'catering', target: 'waste', type: 'waste', label: 'Plate waste' },
             { source: 'restaurants', target: 'waste', type: 'waste', label: 'Overproduction' },
-            { source: 'schools', target: 'waste', type: 'waste', label: 'Uneaten meals' },
             
             // Waste Prevention (green)
             { source: 'retail', target: 'toidupank', type: 'prevention', label: 'Donations' },
-            { source: 'rimi', target: 'toidupank', type: 'prevention', label: 'AI markdown' },
             { source: 'selver', target: 'toidupank', type: 'prevention', label: 'Donations' },
-            { source: 'coop', target: 'toidupank', type: 'prevention', label: 'Partnerships' },
             { source: 'toidupank', target: 'households', type: 'prevention', label: 'Food rescue' },
             
             // Support & Regulation (gray)
