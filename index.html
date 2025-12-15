@@ -306,19 +306,11 @@
         const nodes = [
             // Main Sectors
             { id: 'households', label: 'Households', sector: 'households', size: 48, description: '81,000 tonnes/year (48%), €98M waste, 42% avoidable' },
-            { id: 'industry', label: 'Food Industry', sector: 'industry', size: 19, description: '32,000 tonnes/year (19%), 10% avoidable' },
+            { id: 'industry', label: 'Food Industry', sector: 'industry', size: 19, description: '32,000 tonnes/year (19%), 10% avoidable - includes dairy processors, bakeries, meat processors' },
             { id: 'production', label: 'Primary Production', sector: 'production', size: 14, description: '24,000 tonnes/year (14%), 82% avoidable' },
-            { id: 'retail', label: 'Retail', sector: 'retail', size: 12, description: '20,000 tonnes/year (12%) - includes Rimi (AI markdown pricing), Selver, Coop' },
+            { id: 'retail', label: 'Retail', sector: 'retail', size: 12, description: '20,000 tonnes/year (12%) - includes Rimi (AI markdown pricing), Selver, Coop, Maxima' },
             { id: 'catering', label: 'Catering', sector: 'catering', size: 7, description: '11,000 tonnes/year (7%) - includes schools & kindergartens (1,900t/year, €3.8M losses)' },
             { id: 'logistics', label: 'Logistics & Delivery', sector: 'logistics', size: 8, description: 'Emerging sector: wholesalers, Bolt Food, Wolt (last-mile delivery services)' },
-            
-            // Retail Actors
-            { id: 'selver', label: 'Selver', sector: 'retail', size: 5, description: 'Major retailer with food bank partnerships' },
-            
-            // Industry Actors
-            { id: 'dairy', label: 'Dairy Processors', sector: 'industry', size: 6, description: 'Dairy production and processing' },
-            { id: 'bakery', label: 'Bakeries', sector: 'industry', size: 4, description: 'Bread and bakery products' },
-            { id: 'meat', label: 'Meat Processors', sector: 'industry', size: 5, description: 'Meat processing industry' },
             
             // Production Actors
             { id: 'farmers', label: 'Farmers', sector: 'production', size: 7, description: 'Agricultural producers, 80% avoidable loss' },
@@ -332,7 +324,7 @@
             { id: 'wholesalers', label: 'Wholesalers', sector: 'logistics', size: 5, description: 'Distribution centers and storage' },
             
             // Support Systems
-            { id: 'toidupank', label: 'Toidupank', sector: 'support', size: 6, description: 'Food Bank - receives donations from retail' },
+            { id: 'foodrescue', label: 'Food Rescue Organizations', sector: 'support', size: 6, description: 'Food banks and rescue platforms - includes Toidupank, Sumena, Yummy' },
             { id: 'government', label: 'Government', sector: 'support', size: 7, description: 'Ministry of Rural Affairs, regulations' },
             { id: 'university', label: 'Estonian University', sector: 'support', size: 4, description: 'Research and education' },
             { id: 'waste', label: 'Waste Contractors', sector: 'support', size: 5, description: 'Waste management services' },
@@ -344,9 +336,6 @@
             { source: 'production', target: 'industry', type: 'supply', label: 'Raw materials' },
             { source: 'farmers', target: 'industry', type: 'supply', label: 'Agricultural products' },
             { source: 'farmers', target: 'retail', type: 'supply', label: 'Direct sales' },
-            { source: 'dairy', target: 'retail', type: 'supply', label: 'Dairy products' },
-            { source: 'bakery', target: 'retail', type: 'supply', label: 'Baked goods' },
-            { source: 'meat', target: 'retail', type: 'supply', label: 'Meat products' },
             { source: 'industry', target: 'retail', type: 'supply', label: 'Processed foods' },
             { source: 'industry', target: 'catering', type: 'supply', label: 'Ingredients' },
             { source: 'wholesalers', target: 'retail', type: 'supply', label: 'Distribution' },
@@ -367,9 +356,10 @@
             { source: 'restaurants', target: 'waste', type: 'waste', label: 'Overproduction' },
             
             // Waste Prevention (green)
-            { source: 'retail', target: 'toidupank', type: 'prevention', label: 'Donations' },
-            { source: 'selver', target: 'toidupank', type: 'prevention', label: 'Donations' },
-            { source: 'toidupank', target: 'households', type: 'prevention', label: 'Food rescue' },
+            { source: 'retail', target: 'foodrescue', type: 'prevention', label: 'Donations' },
+            { source: 'industry', target: 'foodrescue', type: 'prevention', label: 'Surplus redistribution' },
+            { source: 'catering', target: 'foodrescue', type: 'prevention', label: 'Excess food' },
+            { source: 'foodrescue', target: 'households', type: 'prevention', label: 'Food rescue distribution' },
             
             // Support & Regulation (gray)
             { source: 'government', target: 'households', type: 'support', label: 'Awareness campaigns' },
